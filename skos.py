@@ -208,7 +208,7 @@ techniques...
      <Concept('http://vocab.nerc.ac.uk/collection/P01/current/ACBSADCP/')>]
 """
 
-__version__ = '0.0.4'
+__version__ = '0.0.4.3'
 SKOS_BASE = "http://www.w3.org/2008/05/skos#"
 
 from sqlalchemy.ext.declarative import declarative_base
@@ -681,7 +681,8 @@ class RDFLoader(collections.Mapping):
             rdflib.URIRef(SKOS_BASE + 'exactMatch'),
             rdflib.URIRef('http://www.w3.org/2006/12/owl2-xml#sameAs'),
             rdflib.URIRef(SKOS_BASE + 'related'),
-            rdflib.URIRef(SKOS_BASE + 'member')
+            rdflib.URIRef(SKOS_BASE + 'member'),
+            rdflib.URIRef(SKOS_BASE + 'hasTopConcept')
             )
 
         resolvable_objects = (
@@ -789,14 +790,19 @@ class RDFLoader(collections.Mapping):
         normalise_uri = self.normalise_uri
         pred_title = rdflib.URIRef('http://purl.org/dc/elements/1.1/title')
         pred_description = rdflib.URIRef('http://purl.org/dc/elements/1.1/description')
+        pred_topConcept = rdflib.URIRef(SKOS_BASE + 'hasTopConcept')
         for subject in self._iterateType(graph, 'ConceptScheme'):
             uri = normalise_uri(subject)
             # create the basic concept
             title = graph.value(subject=subject, predicate=pred_title)
             description = graph.value(subject=subject, predicate=pred_description)
             debug('creating ConceptScheme %s', uri)
-            cache[uri] = ConceptScheme(uri, title, description)
+            scheme =  ConceptScheme(uri, title, description)
+            cache[uri] = scheme
             schemes.add(uri)
+            for object in graph.objects(subject=subject, predicate=pred_topConcept):
+                concept_uri = normalise_uri(object)
+                scheme.concepts.add(cache[concept_uri])
 
         return schemes
 
