@@ -29,7 +29,7 @@ parse a (rather contrived) SKOS XML file into a graph:
 
     >>> import rdflib
     >>> xml = """<?xml version="1.0"?>
-    <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:skos="http://www.w3.org/2004/02/skos/core#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:owlxml="http://www.w3.org/2006/12/owl2-xml#">
+    <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:skos="http://www.w3.org/2008/05/skos#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:owlxml="http://www.w3.org/2006/12/owl2-xml#">
       <skos:Concept rdf:about="http://my.fake.domain/test1">
         <skos:prefLabel>Acoustic backscatter in the water column</skos:prefLabel>
         <skos:definition>Includes all parameters covering the strength of acoustic signal return, including absolute measurements of returning signal strength as well as parameters expressed as backscatter (the proportion of transmitted signal returned)</skos:definition>

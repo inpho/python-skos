@@ -28,7 +28,7 @@ parse a (rather contrived) SKOS XML file into a graph:
 
     >>> import rdflib
     >>> xml = \"\"\"<?xml version="1.0"?>
-    <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:skos="http://www.w3.org/2004/02/skos/core#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:owlxml="http://www.w3.org/2006/12/owl2-xml#">
+    <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:skos="http://www.w3.org/2008/05/skos#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:owlxml="http://www.w3.org/2006/12/owl2-xml#">
       <skos:Concept rdf:about="http://my.fake.domain/test1">
         <skos:prefLabel>Acoustic backscatter in the water column</skos:prefLabel>
         <skos:definition>Includes all parameters covering the strength of acoustic signal return, including absolute measurements of returning signal strength as well as parameters expressed as backscatter (the proportion of transmitted signal returned)</skos:definition>
@@ -208,7 +208,8 @@ techniques...
      <Concept('http://vocab.nerc.ac.uk/collection/P01/current/ACBSADCP/')>]
 """
 
-__version__ = '0.0.3'
+__version__ = '0.0.4'
+SKOS_BASE = "http://www.w3.org/2008/05/skos#"
 
 from sqlalchemy.ext.declarative import declarative_base
 #from sqlalchemy import Table, Column, Integer, String, Date, Float, ForeignKey, event
@@ -675,18 +676,18 @@ class RDFLoader(collections.Mapping):
             resolved = set()
 
         resolvable_predicates = (
-            rdflib.URIRef('http://www.w3.org/2004/02/skos/core#broader'),
-            rdflib.URIRef('http://www.w3.org/2004/02/skos/core#narrower'),
-            rdflib.URIRef('http://www.w3.org/2004/02/skos/core#exactMatch'),
+            rdflib.URIRef(SKOS_BASE + 'broader'),
+            rdflib.URIRef(SKOS_BASE + 'narrower'),
+            rdflib.URIRef(SKOS_BASE + 'exactMatch'),
             rdflib.URIRef('http://www.w3.org/2006/12/owl2-xml#sameAs'),
-            rdflib.URIRef('http://www.w3.org/2004/02/skos/core#related'),
-            rdflib.URIRef('http://www.w3.org/2004/02/skos/core#member')
+            rdflib.URIRef(SKOS_BASE + 'related'),
+            rdflib.URIRef(SKOS_BASE + 'member')
             )
 
         resolvable_objects = (
-            rdflib.URIRef('http://www.w3.org/2004/02/skos/core#ConceptScheme'),
-            rdflib.URIRef('http://www.w3.org/2004/02/skos/core#Concept'),
-            rdflib.URIRef('http://www.w3.org/2004/02/skos/core#Collection')
+            rdflib.URIRef(SKOS_BASE + 'ConceptScheme'),
+            rdflib.URIRef(SKOS_BASE + 'Concept'),
+            rdflib.URIRef(SKOS_BASE + 'Collection')
             )
 
         normalise_uri = self.normalise_uri
@@ -716,7 +717,7 @@ class RDFLoader(collections.Mapping):
         Iterate over all subjects of a specific SKOS type
         """
         predicate = rdflib.URIRef('http://www.w3.org/1999/02/22-rdf-syntax-ns#type')
-        object_ = rdflib.URIRef('http://www.w3.org/2004/02/skos/core#%s' % type_)
+        object_ = rdflib.URIRef(SKOS_BASE + '%s' % type_)
         for subject in graph.subjects(predicate=predicate, object=object_):
             yield subject
 
@@ -724,9 +725,9 @@ class RDFLoader(collections.Mapping):
         # generate all the concepts
         concepts = set()
         normalise_uri = self.normalise_uri
-        prefLabel = rdflib.URIRef('http://www.w3.org/2004/02/skos/core#prefLabel')
-        definition = rdflib.URIRef('http://www.w3.org/2004/02/skos/core#definition')
-        notation = rdflib.URIRef('http://www.w3.org/2004/02/skos/core#notation')
+        prefLabel = rdflib.URIRef(SKOS_BASE + 'prefLabel')
+        definition = rdflib.URIRef(SKOS_BASE + 'definition')
+        notation = rdflib.URIRef(SKOS_BASE + 'notation')
         for subject in self._iterateType(graph, 'Concept'):
             uri = normalise_uri(subject)
             # create the basic concept
@@ -738,10 +739,10 @@ class RDFLoader(collections.Mapping):
             concepts.add(uri)
 
         attrs = {
-            rdflib.URIRef('http://www.w3.org/2004/02/skos/core#narrower'): 'narrower',
-            rdflib.URIRef('http://www.w3.org/2004/02/skos/core#broader'): 'broader',
-            rdflib.URIRef('http://www.w3.org/2004/02/skos/core#related'): 'related',
-            rdflib.URIRef('http://www.w3.org/2004/02/skos/core#exactMatch'): 'synonyms',
+            rdflib.URIRef(SKOS_BASE + 'narrower'): 'narrower',
+            rdflib.URIRef(SKOS_BASE + 'broader'): 'broader',
+            rdflib.URIRef(SKOS_BASE + 'related'): 'related',
+            rdflib.URIRef(SKOS_BASE + 'exactMatch'): 'synonyms',
             rdflib.URIRef('http://www.w3.org/2006/12/owl2-xml#sameAs'): 'synonyms'
             }
         for predicate, attr in attrs.iteritems():
@@ -772,7 +773,7 @@ class RDFLoader(collections.Mapping):
             cache[uri] = Collection(uri, title, description, date)
             collections.add(uri)
 
-        for subject, object_ in graph.subject_objects(predicate=rdflib.URIRef('http://www.w3.org/2004/02/skos/core#member')):
+        for subject, object_ in graph.subject_objects(predicate=rdflib.URIRef(SKOS_BASE + 'member')):
             try:
                 member = cache[normalise_uri(object_)]
             except KeyError:

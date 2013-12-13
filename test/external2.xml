@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
 <!-- An external SKOS concept retrieved from http://vocab.ndg.nerc.ac.uk/term/P041/4/G874 -->
 <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" 
-xmlns:skos="http://www.w3.org/2004/02/skos/core#" 
+xmlns:skos="http://www.w3.org/2008/05/skos#" 
 xmlns:dc="http://purl.org/dc/elements/1.1/"> 
 <skos:Concept rdf:about='./external2.xml'>
 <skos:notation>SDN:P041:4:G874</skos:notation>
